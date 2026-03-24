@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Smartphone, Loader2, AlertCircle, RefreshCw, CheckCircle2 } from "lucide-react"
+import { Smartphone, Loader2, AlertCircle, RefreshCw, CheckCircle2, MapPin, Bell, MessageSquare, ShieldCheck } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -12,6 +12,93 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp"
 import { REGEXP_ONLY_DIGITS } from "input-otp"
+
+type Permission = "location" | "notifications" | "messages"
+
+const PERMISSIONS: {
+  key: Permission
+  icon: React.ReactNode
+  title: string
+  description: string
+  reason: string
+  color: string
+}[] = [
+  {
+    key: "location",
+    icon: <MapPin className="h-8 w-8 text-red-600" />,
+    title: "Allow Location Access",
+    description: "Quick Blood would like to access your location.",
+    reason:
+      "We use your location to find nearby blood donors, patients, and hospitals in real-time emergencies — helping save lives faster.",
+    color: "bg-red-100",
+  },
+  {
+    key: "notifications",
+    icon: <Bell className="h-8 w-8 text-orange-500" />,
+    title: "Allow Notifications",
+    description: "Quick Blood would like to send you notifications.",
+    reason:
+      "Get instant alerts for blood requests matching your type, urgent donation drives, and updates on requests you've responded to.",
+    color: "bg-orange-100",
+  },
+  {
+    key: "messages",
+    icon: <MessageSquare className="h-8 w-8 text-blue-600" />,
+    title: "Allow Messages",
+    description: "Quick Blood would like to send you SMS messages.",
+    reason:
+      "Critical OTPs and emergency blood request alerts will be sent via SMS so you never miss an urgent need — even without internet.",
+    color: "bg-blue-100",
+  },
+]
+
+function PermissionDialog({
+  permission,
+  onAllow,
+  onDeny,
+}: {
+  permission: (typeof PERMISSIONS)[number]
+  onAllow: (key: Permission) => void
+  onDeny: (key: Permission) => void
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      {/* Sheet */}
+      <div className="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
+        {/* Icon area */}
+        <div className="flex flex-col items-center gap-3 px-6 pt-8 pb-4 text-center">
+          <div className={`w-16 h-16 rounded-2xl ${permission.color} flex items-center justify-center`}>
+            {permission.icon}
+          </div>
+          <h2 className="text-lg font-bold text-gray-900">{permission.title}</h2>
+          <p className="text-sm text-gray-500">{permission.description}</p>
+          <div className="w-full rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-xs text-gray-600 leading-relaxed text-left">
+            <ShieldCheck className="h-3.5 w-3.5 inline-block mr-1 text-green-600 mb-0.5" />
+            {permission.reason}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-2 px-6 pb-6 pt-2">
+          <button
+            onClick={() => onAllow(permission.key)}
+            className="w-full rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold py-3 text-sm transition-colors"
+          >
+            Allow
+          </button>
+          <button
+            onClick={() => onDeny(permission.key)}
+            className="w-full rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 text-sm transition-colors"
+          >
+            Don&apos;t Allow
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function StepIndicator({ current }: { current: number }) {
   const steps = ["Details", "Email OTP", "Phone OTP"]
@@ -61,6 +148,7 @@ export default function VerifyPhonePage() {
   const [countdown, setCountdown] = useState(60)
   const [canResend, setCanResend] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [permissionStep, setPermissionStep] = useState<number | null>(null)
 
   useEffect(() => {
     const data = sessionStorage.getItem("qb_pending_registration")
@@ -115,9 +203,16 @@ export default function VerifyPhonePage() {
       // Mark phone verified and complete registration
       sessionStorage.setItem("qb_phone_verified", "true")
 
+      // Preserve name + role for onboarding before clearing
+      const regRaw = sessionStorage.getItem("qb_pending_registration")
+      if (regRaw) {
+        const { fullName, role } = JSON.parse(regRaw) as { fullName: string; role: string }
+        sessionStorage.setItem("qb_user_name", fullName)
+        sessionStorage.setItem("qb_user_role", role)
+      }
+
       // TODO: call registration API with sessionStorage data
-      // const regData = JSON.parse(sessionStorage.getItem("qb_pending_registration")!)
-      // await api.register(regData)
+      // await api.register(JSON.parse(regRaw!))
 
       // Clear session data
       sessionStorage.removeItem("qb_pending_registration")
@@ -127,35 +222,57 @@ export default function VerifyPhonePage() {
       sessionStorage.removeItem("qb_phone_verified")
 
       setSuccess(true)
-      await new Promise((r) => setTimeout(r, 1800))
-      router.push("/auth/login?registered=true")
+      await new Promise((r) => setTimeout(r, 1200))
+      setPermissionStep(0)
     })
+  }
+
+  function advancePermission(key: Permission, granted: boolean) {
+    sessionStorage.setItem(`qb_perm_${key}`, granted ? "allowed" : "denied")
+    const next = (permissionStep ?? 0) + 1
+    if (next >= PERMISSIONS.length) {
+      setPermissionStep(null)
+      router.push("/auth/onboarding")
+    } else {
+      setPermissionStep(next)
+    }
   }
 
   if (success) {
     return (
-      <Card className="shadow-lg border-0">
-        <CardContent className="flex flex-col items-center gap-4 py-12">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-            <CheckCircle2 className="h-8 w-8 text-green-600" />
-          </div>
-          <div className="text-center space-y-1">
-            <h2 className="text-xl font-bold text-gray-900">Account Created!</h2>
-            <p className="text-sm text-gray-500">
-              Both email and phone verified. Redirecting to login...
-            </p>
-          </div>
-          <div className="flex gap-1">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="w-2 h-2 rounded-full bg-red-400 animate-bounce"
-                style={{ animationDelay: `${i * 0.15}s` }}
-              />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <>
+        {permissionStep !== null && (
+          <PermissionDialog
+            permission={PERMISSIONS[permissionStep]}
+            onAllow={(k) => advancePermission(k, true)}
+            onDeny={(k) => advancePermission(k, false)}
+          />
+        )}
+        <Card className="shadow-lg border-0">
+          <CardContent className="flex flex-col items-center gap-4 py-12">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircle2 className="h-8 w-8 text-green-600" />
+            </div>
+            <div className="text-center space-y-1">
+              <h2 className="text-xl font-bold text-gray-900">Account Created!</h2>
+              <p className="text-sm text-gray-500">
+                {permissionStep === null
+                  ? "Redirecting to login..."
+                  : "Setting up your permissions..."}
+              </p>
+            </div>
+            <div className="flex gap-1">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="w-2 h-2 rounded-full bg-red-400 animate-bounce"
+                  style={{ animationDelay: `${i * 0.15}s` }}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </>
     )
   }
 
