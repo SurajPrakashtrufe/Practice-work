@@ -27,13 +27,13 @@ const NAV: Record<string, { href: string; icon: React.ElementType; label: string
   ],
   patient: [
     { href: "/dashboard/patient",              icon: Home,          label: "Home"     },
-    { href: "/dashboard/patient/request/new",  icon: PlusCircle,    label: "New Req"  },
+    { href: "/dashboard/sos",                  icon: Bell,          label: "SOS"      },
     { href: "/dashboard/patient/requests",     icon: ClipboardList, label: "Requests" },
     { href: "/dashboard/patient/profile",      icon: User,          label: "Profile"  },
   ],
   hospital: [
     { href: "/dashboard/hospital",             icon: Home,          label: "Home"      },
-    { href: "/dashboard/hospital/request/new", icon: PlusCircle,    label: "New Req"   },
+    { href: "/dashboard/hospital/requests",    icon: ClipboardList, label: "Requests"  },
     { href: "/dashboard/hospital/inventory",   icon: Layers,        label: "Inventory" },
     { href: "/dashboard/hospital/profile",     icon: User,          label: "Profile"   },
   ],
@@ -215,10 +215,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex-1 hidden md:block" />
 
           {/* Right side: bell + avatar */}
-          <button className="relative p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
+          <Link href="/dashboard/notifications" className="relative p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-          </button>
+          </Link>
           <div className={`w-8 h-8 rounded-full ${accentBg} flex items-center justify-center text-white text-xs font-bold cursor-pointer`}>
             {initials}
           </div>
