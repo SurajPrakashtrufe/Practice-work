@@ -6,6 +6,7 @@ import {
   ChevronLeft, ChevronRight, Droplets, MapPin, Zap, Calendar, RefreshCw,
   User, Phone, CheckCircle2, Loader2,
 } from "lucide-react"
+import { toast } from "sonner"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -425,6 +426,7 @@ export default function NewPatientRequest() {
     setTimeout(() => {
       setSubmitting(false)
       setDone(true)
+      toast.success("Blood request posted! Notifying nearby donors…")
     }, 1200)
   }
 

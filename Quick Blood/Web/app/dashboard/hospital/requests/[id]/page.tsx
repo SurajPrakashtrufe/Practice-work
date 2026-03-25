@@ -8,6 +8,7 @@ import {
   Share2, Edit3, XCircle,
 } from "lucide-react"
 import Link from "next/link"
+import { toast } from "sonner"
 
 // ── Mock data ─────────────────────────────────────────────────────────────────
 
@@ -217,12 +218,19 @@ export default function HospitalRequestDetail() {
     ["responded","confirmed"].includes(localResponses[d.id] ?? d.responseStatus)
   ).length
 
-  function confirmDonor(id: string) { setLocalResponses(p => ({ ...p, [id]: "confirmed" })) }
-  function declineDonor(id: string) { setLocalResponses(p => ({ ...p, [id]: "declined" })) }
+  function confirmDonor(id: string) {
+    setLocalResponses(p => ({ ...p, [id]: "confirmed" }))
+    toast.success("Donor confirmed — direct them to the blood bank window.")
+  }
+  function declineDonor(id: string) {
+    setLocalResponses(p => ({ ...p, [id]: "declined" }))
+    toast("Donor declined.")
+  }
 
   function handleFulfill() {
     setShowFulfill(false)
     setFulfilled(true)
+    toast.success("Request marked as fulfilled. Donor cooldown has started.")
   }
 
   const shareText = `Urgent: ${request.units} unit(s) of ${request.group} blood needed at our hospital. Please help! #QuickBlood`

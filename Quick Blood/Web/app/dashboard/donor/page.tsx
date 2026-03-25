@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Droplets, MapPin, Clock, Heart, ChevronRight, Zap, TrendingUp, BadgeCheck } from "lucide-react"
+import { toast } from "sonner"
 import type { QBSession } from "../layout"
 
 const BLOOD_COMPAT: Record<string, string[]> = {
@@ -55,6 +56,7 @@ export default function DonorHome() {
         localStorage.setItem("qb_session", JSON.stringify({ ...s, isAvailable: next }))
       }
       setToggling(false)
+      toast.success(next ? "You're now available to donate" : "You've been marked unavailable")
     }, 600)
   }
 

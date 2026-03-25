@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { MapPin, Zap, Calendar, RefreshCw, CheckCircle2, Clock, Filter } from "lucide-react"
+import { toast } from "sonner"
 import type { QBSession } from "../../layout"
 
 // ── Blood compatibility map ───────────────────────────────────────────────────
@@ -73,6 +74,7 @@ export default function DonorRequests() {
     setResponses(prev => ({ ...prev, [id]: "pending" }))
     setTimeout(() => {
       setResponses(prev => ({ ...prev, [id]: "accepted" }))
+      toast.success("Response sent! The hospital will confirm your donation.")
     }, 800)
   }
 

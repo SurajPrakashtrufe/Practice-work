@@ -7,6 +7,7 @@ import {
   CheckCircle2, Timer, Phone, MessageSquare, Star,
   AlertCircle, Users, Clock,
 } from "lucide-react"
+import { toast } from "sonner"
 
 // ── Mock data ─────────────────────────────────────────────────────────────────
 
@@ -205,6 +206,7 @@ export default function PatientRequestDetail() {
 
   function confirmDonor(donorId: string) {
     setLocalResponses(prev => ({ ...prev, [donorId]: "confirmed" }))
+    toast.success("Donor confirmed! Please coordinate at the blood bank.")
   }
 
   function markFulfilled() {
@@ -212,6 +214,7 @@ export default function PatientRequestDetail() {
     setTimeout(() => {
       setFulfilling(false)
       setFulfilled(true)
+      toast.success("Request marked as fulfilled. Thank you!")
     }, 1000)
   }
 

@@ -14,8 +14,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Quick Blood",
-  description: "Connecting blood donors with people and hospitals in need",
+  title: {
+    default: "Quick Blood — Save Lives, One Drop at a Time",
+    template: "%s | Quick Blood",
+  },
+  description: "Connect blood donors with patients and hospitals in real time. Register, request blood, or manage your hospital — all in one place.",
+  keywords: ["blood donation", "blood bank", "donor", "quick blood", "emergency blood", "India"],
+  metadataBase: new URL("https://quickblood.in"),
+  openGraph: {
+    title: "Quick Blood",
+    description: "Real-time blood donor matching for India.",
+    siteName: "Quick Blood",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Quick Blood",
+    description: "Real-time blood donor matching for India.",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Quick Blood",
+  },
+  formatDetection: { telephone: false },
 };
 
 export default function RootLayout({

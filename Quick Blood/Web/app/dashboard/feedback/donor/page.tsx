@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Star, Heart, ChevronLeft, CheckCircle2, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 const ASPECTS = [
   { key: "punctual",    label: "Arrived on time"         },
@@ -32,7 +33,11 @@ export default function DonorFeedbackPage() {
   function submit() {
     if (stars === 0) return
     setSubmitting(true)
-    setTimeout(() => { setSubmitting(false); setDone(true) }, 1000)
+    setTimeout(() => {
+      setSubmitting(false)
+      setDone(true)
+      toast.success("Feedback submitted. Thank you!")
+    }, 1000)
   }
 
   if (done) {

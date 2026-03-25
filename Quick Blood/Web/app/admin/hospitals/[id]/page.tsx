@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "sonner"
 import { useRouter, useParams } from "next/navigation"
 import {
   ChevronLeft, Building, CheckCircle2, XCircle, Clock,
@@ -69,6 +70,11 @@ export default function HospitalVerification() {
       setSubmitting(false)
       setDecision(type === "approve" ? "approved" : "rejected")
       setConfirming(null)
+      if (type === "approve") {
+        toast.success(`${h.name} has been approved and verified.`)
+      } else {
+        toast("Application rejected. Hospital has been notified.")
+      }
     }, 1000)
   }
 

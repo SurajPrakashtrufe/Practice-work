@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Droplets, Plus, Minus, Save, CheckCircle2, AlertTriangle, ChevronRight, RefreshCw } from "lucide-react"
+import { toast } from "sonner"
 import Link from "next/link"
 
 // ── Types & constants ─────────────────────────────────────────────────────────
@@ -65,6 +66,7 @@ export default function HospitalInventory() {
       setSaving(false)
       setSaved(true)
       setEditing(null)
+      toast.success("Inventory updated successfully")
     }, 800)
   }
 
