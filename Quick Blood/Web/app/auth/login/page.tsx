@@ -3,13 +3,25 @@
 import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react"
+import { Eye, EyeOff, Loader2, AlertCircle, Droplets, Hospital, User } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
+
+type Role = "donor" | "patient" | "hospital"
+
+function saveSession(name: string, email: string, role: Role) {
+  localStorage.setItem("qb_session", JSON.stringify({
+    name,
+    email,
+    role,
+    bloodGroup: "B+",
+    isAvailable: true,
+  }))
+}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -25,15 +37,25 @@ export default function LoginPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-
     if (!form.email.trim() || !form.password) {
       setError("Please fill in all fields.")
       return
     }
-
     startTransition(async () => {
       // TODO: Replace with real API call
       await new Promise((r) => setTimeout(r, 1000))
+      const name = form.email.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+      saveSession(name, form.email, "donor")
+      router.push("/dashboard")
+    })
+  }
+
+  function demoLogin(role: Role) {
+    startTransition(async () => {
+      await new Promise((r) => setTimeout(r, 400))
+      const names = { donor: "Arjun Sharma", patient: "Priya Patel", hospital: "Apollo Admin" }
+      const emails = { donor: "arjun@demo.com", patient: "priya@demo.com", hospital: "admin@apollo.com" }
+      saveSession(names[role], emails[role], role)
       router.push("/dashboard")
     })
   }
@@ -114,6 +136,36 @@ export default function LoginPage() {
             )}
           </Button>
         </form>
+
+        {/* Demo quick-login */}
+        <div className="relative my-5">
+          <Separator />
+          <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-xs text-gray-400">
+            Demo
+          </span>
+        </div>
+
+        <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 space-y-2">
+          <p className="text-xs text-amber-700 font-semibold text-center">Quick demo login — choose a role</p>
+          <div className="grid grid-cols-3 gap-2">
+            {([
+              { role: "donor" as Role, label: "Donor", icon: Droplets, color: "text-red-600" },
+              { role: "patient" as Role, label: "Patient", icon: User, color: "text-blue-600" },
+              { role: "hospital" as Role, label: "Hospital", icon: Hospital, color: "text-green-600" },
+            ]).map(({ role, label, icon: Icon, color }) => (
+              <button
+                key={role}
+                type="button"
+                onClick={() => demoLogin(role)}
+                disabled={isPending}
+                className="flex flex-col items-center gap-1 py-2.5 rounded-xl border border-amber-200 bg-white hover:bg-amber-50 transition-colors disabled:opacity-50"
+              >
+                <Icon className={`h-4 w-4 ${color}`} />
+                <span className="text-xs font-medium text-gray-700">{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="relative my-5">
           <Separator />
